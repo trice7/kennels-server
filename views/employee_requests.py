@@ -21,14 +21,16 @@ def get_single_employee(id):
         db_cursor.execute("""
         SELECT
             a.id,
-            a.name
+            a.name,
+            a.address,
+            a.location_id
         FROM employee a
         WHERE a.id = ?            
         """, (id, ))
         
         data = db_cursor.fetchone()
         
-        employee = Employee(data['id'], data['name'])
+        employee = Employee(data['id'], data['name'], data['address'], data['location_id'])
         
         return employee.__dict__
   
@@ -41,7 +43,9 @@ def get_all_employees():
         db_cursor.execute("""
         SELECT
             a.id,
-            a.name
+            a.name,
+            a.address,
+            a.location_id
         FROM employee a                  
         """)
         
@@ -49,7 +53,7 @@ def get_all_employees():
         dataset = db_cursor.fetchall()
         
         for row in dataset:
-            employee = Employee(row['id'], row['name'])
+            employee = Employee(row['id'], row['name'], row['address'], row['location_id'])
             
             employees.append(employee.__dict__)
     return employees
@@ -78,3 +82,26 @@ def update_employee(id, new_employee):
         if employee['id'] == id:
             EMPLOYEES[index] = new_employee
             break
+
+def get_employee_by_location(location_id):
+    with sqlite3.connect("./kennel.sqlite3") as conn:
+        conn.row_factory = sqlite3.Row
+        db_cursor = conn.cursor()
+        
+        db_cursor.execute("""
+        SELECT
+            c.id,
+            c.name,
+            c.address,
+            c.location_id
+        FROM Employee c
+        WHERE c.location_id = ?
+        """, (location_id, ))
+        
+        employees = []
+        dataset = db_cursor.fetchall()
+        
+        for row in dataset:
+            animal = Employee(row['id'], row['name'], row['address'], row['location_id'])
+            employees.append(animal.__dict__)
+    return employees
